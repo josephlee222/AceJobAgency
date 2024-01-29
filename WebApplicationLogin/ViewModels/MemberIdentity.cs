@@ -14,6 +14,7 @@ namespace AceJobAgency.ViewModels
         public DateTime DateOfBirth { get; set; }
         public string Resume { get; set; } = string.Empty;
         public string About { get; set; } = string.Empty;
+        public string GUID { get; set; } = string.Empty;
 
         // Password History
         public List<PasswordHistory> PasswordHistory { get; set; } = new List<PasswordHistory>();

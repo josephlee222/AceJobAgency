@@ -6,7 +6,7 @@
 <script src="https://www.google.com/recaptcha/api.js"></script>
 <script>
 	function onSubmit(token) {
-		document.getElementById("loginForm").submit();
+		document.getElementById("registerForm").submit();
 	}
 </script>
 
@@ -15,9 +15,9 @@
 	<div class="row justify-content-center align-items-center">
 
 		<div class="col-sm-12 col-md-12 col-lg-4">
-			<h1 class="mb-3">Register </h1>
+			<h1 class="mb-3">Register</h1>
 
-			<form method="post" enctype="multipart/form-data" asp-antiforgery="true">
+			<form method="post" enctype="multipart/form-data" asp-antiforgery="true" id="registerForm">
 				<div asp-validation-summary="All" class="text-danger"></div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="RModel.Email">Email Address</label>

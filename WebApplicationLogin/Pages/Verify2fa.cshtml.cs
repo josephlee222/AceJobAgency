@@ -51,12 +51,25 @@ namespace AceJobAgency.Pages
 					// Get the user
 					var user = await signInManager.UserManager.FindByEmailAsync(Email);
 
+					// Create GUID
+					var guid = Guid.NewGuid().ToString();
+					user.GUID = guid;
+					await signInManager.UserManager.UpdateAsync(user);
+
 					//Create the security context
 					var claims = new List<Claim> {
 						new Claim(ClaimTypes.Name, user.Email),
 						new Claim(ClaimTypes.Email, user.Email),
-						new Claim("Department", "HR")
-};
+						new Claim("Department", "HR"),
+					};
+
+					Response.Cookies.Append("GUID", guid, new CookieOptions
+					{
+						HttpOnly = true,
+						Secure = true,
+						SameSite = SameSiteMode.Strict,
+					});
+
 					var i = new ClaimsIdentity(claims, "MyCookieAuth");
 					ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(i);
 					await HttpContext.SignInAsync("MyCookieAuth", claimsPrincipal);
