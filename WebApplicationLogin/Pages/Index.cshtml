@@ -12,7 +12,7 @@
 	<div>
 		<h1 class="display-4">Welcome, @Model.FirstName @Model.LastName</h1>
 		<p>Here are your account details</p>
-		<div class="card" style="width: 500px">
+		<div class="card" style="width: 100%">
 			<div class="card-body">
 				<h5 class="card-title">Account Details</h5>
 				<p class="card-text">Email: @User.Identity.Name</p>
@@ -24,6 +24,7 @@
 				<p class="card-text">Resume: <a href="Resume/@Model.Email/@Model.ResumeFile">@Model.ResumeFile</a></p>
 				<p class="card-text">Who Am I?: @Model.About</p>
 				<a href="ChangePassword" class="btn btn-primary">Change Password</a>
+				<a href="Enable2FA" class="btn btn-primary">Enable 2FA</a>
 			</div>
 		</div>
 	</div>
@@ -31,6 +32,6 @@
 } else {
 	<div class="text-center">
 		<h1 class="display-4">Welcome</h1>
-		<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+		<p><a class="btn btn-primary" href="/Login">Login</a> or <a class="btn btn-primary" href="/Register">Register</a> yourself to get started on this website.</p>
 	</div>
 }

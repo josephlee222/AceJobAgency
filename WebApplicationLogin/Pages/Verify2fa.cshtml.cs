@@ -9,65 +9,47 @@ using Microsoft.EntityFrameworkCore;
 using WebApp_Core_Identity.Model;
 using AceJobAgency.ViewModels;
 using static System.Net.WebRequestMethods;
-using System.Net.Mail;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AceJobAgency.Pages
 {
 	[ValidateAntiForgeryToken]
-	public class LoginModel : PageModel
+	public class Verify2FAModel : PageModel
     {
 
 		[BindProperty]
-		public Login LModel { get; set; }
+		public SecondFA VModel { get; set; }
 		private readonly AuthDbContext _context;
 
 		private readonly SignInManager<MemberIdentity> signInManager;
-		public LoginModel(SignInManager<MemberIdentity> signInManager, AuthDbContext context)
+		public Verify2FAModel(SignInManager<MemberIdentity> signInManager, AuthDbContext context)
 		{
 			this.signInManager = signInManager;
 			_context = context;
 		}
 
-		public async Task<IActionResult> OnPostAsync()
+		public async Task<IActionResult> OnPostAsync(string Email)
 		{
 			if (ModelState.IsValid)
 			{
+				if (VModel.Code == null)
+				{
+					return RedirectToPage("/Index");
+				}
+
+				// Check the CAPTCHA
 				if (!ValidateCaptcha())
 				{
 					ModelState.AddModelError("", "You failed the CAPTCHA");
 					return Page();
 				}
 
-				var identityResult = await signInManager.PasswordSignInAsync(LModel.Email, LModel.Password,
-				LModel.RememberMe, true);
-				if (identityResult.IsLockedOut)
-				{
-					ModelState.AddModelError("", "Account locked out, try again later");
-				} else if (identityResult.RequiresTwoFactor)
-				{
-					var user = await signInManager.UserManager.FindByEmailAsync(LModel.Email);
-					var code = await signInManager.UserManager.GenerateTwoFactorTokenAsync(user, "Email");
-
-					// Send email
-					var client = new SmtpClient(
-						"smtp.gmail.com",
-						587
-					);
-					client.Credentials = new NetworkCredential("envirogo.noreply@gmail.com", "iygglhyrpdnvhtem");
-					client.EnableSsl = true;
-
-					var message = new MailMessage();
-					message.From = new MailAddress("verify@acejobagency.com");
-					message.To.Add(LModel.Email);
-					message.Subject = "Verify 2-Factor Login";
-					message.Body = $"Please use this code as your 2-factor authentication code: {code}";
-					await client.SendMailAsync(message);
-
-					return RedirectToPage("/Verify2FA", new { Email=LModel.Email });
-				} else if (identityResult.Succeeded)
+				// Verify the 2FA code
+				var result = await signInManager.TwoFactorSignInAsync("Email", VModel.Code, false, false);
+				if (result.Succeeded)
 				{
 					// Get the user
-					var user = await signInManager.UserManager.FindByEmailAsync(LModel.Email);
+					var user = await signInManager.UserManager.FindByEmailAsync(Email);
 
 					//Create the security context
 					var claims = new List<Claim> {
@@ -79,21 +61,24 @@ namespace AceJobAgency.Pages
 					ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(i);
 					await HttpContext.SignInAsync("MyCookieAuth", claimsPrincipal);
 
+					// Create audit record
 					var audit = new AuditLog
 					{
 						UserId = user.Id,
 						CreatedDate = DateTime.Now,
-						Activity = "Login",
+						Activity = "Logged in via 2FA"
 					};
 
 					_context.AuditLogs.Add(audit);
 					await _context.SaveChangesAsync();
-
-					return RedirectToPage("Index");
-				} else
-				{
-					ModelState.AddModelError("", "Username or Password incorrect");
+					return RedirectToPage("/Index");
 				}
+				else
+				{
+					ModelState.AddModelError("", "Invalid code");
+					return Page();
+				}
+				
 			}
 			return Page();
 		}

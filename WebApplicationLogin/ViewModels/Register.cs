@@ -43,6 +43,7 @@ namespace AceJobAgency.ViewModels
         public IFormFile Resume { get; set; }
 
         [Required(ErrorMessage = "Please enter a short description about yourself")]
+        [DataType(DataType.MultilineText)]
         public string About { get; set; }
     }
 

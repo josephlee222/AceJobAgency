@@ -13,26 +13,29 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AceJobAgency.Pages
 {
-	[Authorize(Policy = "LoggedIn")]
 	[ValidateAntiForgeryToken]
-	public class ChangePasswordModel : PageModel
+	public class ResetPasswordModel : PageModel
     {
 
 		[BindProperty]
-		public ChangePassword CPModel { get; set; }
+		public ResetPassword CPModel { get; set; }
 		private readonly AuthDbContext _context;
 
 		private readonly SignInManager<MemberIdentity> signInManager;
-		public ChangePasswordModel(SignInManager<MemberIdentity> signInManager, AuthDbContext context)
+		public ResetPasswordModel(SignInManager<MemberIdentity> signInManager, AuthDbContext context)
 		{
 			this.signInManager = signInManager;
 			_context = context;
 		}
 
-		public async Task<IActionResult> OnPostAsync()
+		public async Task<IActionResult> OnPostAsync(string token, string UserId)
 		{
 			if (ModelState.IsValid)
 			{
+				if (token == null || UserId == null)
+				{
+					return RedirectToPage("/Index");
+				}
 
 				// Check the CAPTCHA
 				if (!ValidateCaptcha())
@@ -41,23 +44,14 @@ namespace AceJobAgency.Pages
 					return Page();
 				}
 
-				// Get the user
-				var user = await signInManager.UserManager.FindByEmailAsync(User.Identity.Name);
-				var passwordHistory = await _context.PasswordHistories.Where(x => x.UserId == user.Id).ToListAsync();
+				var user = await signInManager.UserManager.FindByIdAsync(UserId);
+
 				if (user == null)
 				{
-					ModelState.AddModelError("", "User not found");
-					return Page();
+					return RedirectToPage("/Index");
 				}
 
-				// Check whether the old password is correct
-				var result = await signInManager.UserManager.CheckPasswordAsync(user, CPModel.CurrentPassword);
-
-				if (!result)
-				{
-					ModelState.AddModelError("", "Current password is incorrect");
-					return Page();
-				}
+				var passwordHistory = await _context.PasswordHistories.Where(x => x.UserId == user.Id).ToListAsync();
 
 				// Check if the new password is the same as the old password
 				var newResult = await signInManager.UserManager.CheckPasswordAsync(user, CPModel.Password);
@@ -82,42 +76,39 @@ namespace AceJobAgency.Pages
 					}
 				}
 
-				// Check whether a password change happened in the last 24 hours
-				var lastChange = passwordHistory.OrderByDescending(x => x.DateChanged).FirstOrDefault();
-				if (lastChange != null)
+				var result = await signInManager.UserManager.ResetPasswordAsync(user, token, CPModel.Password);
+
+				if (result.Succeeded)
 				{
-					if (lastChange.DateChanged.AddHours(24) > DateTime.Now)
+					// Add the new password to the password history
+					var newHistory = new PasswordHistory
 					{
-						ModelState.AddModelError("", "You cannot change your password more than once in 24 hours");
-						return Page();
-					}
+						UserId = user.Id,
+						Password = CPModel.Password,
+						DateChanged = DateTime.Now
+					};
+
+					// Create audit log
+					var auditLog = new AuditLog
+					{
+						UserId = user.Id,
+						CreatedDate = DateTime.Now,
+						Activity = "Password reset"
+					};
+
+					_context.PasswordHistories.Add(newHistory);
+					_context.AuditLogs.Add(auditLog);
+					await _context.SaveChangesAsync();
+
+					// Sign the user out
+					await signInManager.SignOutAsync();
+
+					return RedirectToPage("/Index");
 				}
-
-				// Change the password
-				await signInManager.UserManager.ChangePasswordAsync(user, CPModel.CurrentPassword, CPModel.Password);
-
-				// Add the password to the history
-				user.PasswordHistory.Add(new PasswordHistory
+				else
 				{
-					UserId = user.Id,
-					Password = signInManager.UserManager.PasswordHasher.HashPassword(user, CPModel.Password),
-					DateChanged = DateTime.Now
-				});
-
-				// Add audit record
-				_context.AuditLogs.Add(new AuditLog
-				{
-					UserId = user.Id,
-					Activity = "Password Changed",
-					CreatedDate = DateTime.Now
-				});
-
-				// Save the changes
-				await signInManager.UserManager.UpdateAsync(user);
-				await _context.SaveChangesAsync();
-				
-				// Return to the index page
-				return RedirectToPage("Index");
+					return RedirectToPage("/Index");
+				}
 			}
 			return Page();
 		}
@@ -146,8 +137,21 @@ namespace AceJobAgency.Pages
 			}
 
 		}
-		public void OnGet()
+		public async Task<IActionResult> OnGetAsync(string token, string UserId)
         {
+			if (token == null || UserId == null)
+			{
+				return RedirectToPage("/Index");
+			}
+
+			var user = await signInManager.UserManager.FindByIdAsync(UserId);
+
+			if (user == null)
+			{
+				return RedirectToPage("/Index");
+			}
+
+			return Page();
         }
     }
 }

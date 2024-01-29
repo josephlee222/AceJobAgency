@@ -21,7 +21,7 @@ builder.Services.AddIdentity<MemberIdentity, IdentityRole>(options =>
 	options.Password.RequiredLength = 12;
 
 	options.User.RequireUniqueEmail = true;
-}).AddEntityFrameworkStores<AuthDbContext>();
+}).AddEntityFrameworkStores<AuthDbContext>().AddDefaultTokenProviders();
 
 builder.Services.AddSession(options =>
 {
@@ -68,6 +68,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+app.UseSession();
+app.UseStatusCodePagesWithRedirects("/Errors/{0}");
 
 app.UseAuthentication();
 

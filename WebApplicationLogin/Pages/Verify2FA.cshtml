@@ -1,0 +1,37 @@
+﻿@page
+@model Verify2FAModel
+@{
+}
+
+<script src="https://www.google.com/recaptcha/api.js"></script>
+<script>
+	function onSubmit(token) {
+		document.getElementById("verifyForm").submit();
+	}
+</script>
+
+<div class="container mt-5">
+	<div class="row justify-content-center align-items-center">
+
+		<div class="col-sm-12 col-md-12 col-lg-4">
+			<h1 class="mb-3">2-Factor Authentication</h1>
+			<p>Enter the code that has been sent to your e-mail address</p>
+
+			<form method="post" id="verifyForm" asp-antiforgery="true">
+				<div asp-validation-summary="All" class="text-danger"></div>
+				<div class="mb-3">
+					<label class="form-label" asp-for="VModel.Code">Verification Code</label>
+					<input type="number" asp-for="VModel.Code" class="form-control" />
+					<span asp-validaton-for="VModel.Code" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<button type="submit" class="btn btn-primary g-recaptcha" data-sitekey="6LeFHl8pAAAAALm0F_-z467ty7Qy3gE_9PYmOEQU" data-callback='onSubmit'>
+						Verify Code
+					</button>
+					<a class="btn btn-outline-primary" href="/">Cancel</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

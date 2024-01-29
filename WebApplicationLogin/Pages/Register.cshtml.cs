@@ -8,7 +8,8 @@ using AceJobAgency.ViewModels;
 
 namespace AceJobAgency.Pages
 {
-    public class RegisterModel : PageModel
+	[ValidateAntiForgeryToken]
+	public class RegisterModel : PageModel
     {
 		private UserManager<MemberIdentity> userManager { get; }
 		private SignInManager<MemberIdentity> signInManager { get; }
