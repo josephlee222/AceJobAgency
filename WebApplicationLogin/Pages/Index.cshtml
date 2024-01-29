@@ -1,0 +1,36 @@
+﻿@page
+@model IndexModel
+@using Microsoft.AspNetCore.Identity
+@using AceJobAgency.ViewModels;
+@inject SignInManager<MemberIdentity> SignInManager
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@if (SignInManager.IsSignedIn(User))
+{
+	<div>
+		<h1 class="display-4">Welcome, @Model.FirstName @Model.LastName</h1>
+		<p>Here are your account details</p>
+		<div class="card" style="width: 500px">
+			<div class="card-body">
+				<h5 class="card-title">Account Details</h5>
+				<p class="card-text">Email: @User.Identity.Name</p>
+				<p class="card-text">First Name: @Model.FirstName</p>
+				<p class="card-text">Last Name: @Model.LastName</p>
+				<p class="card-text">Gender: @Model.Gender</p>
+				<p class="card-text">NRIC: @Model.Nric</p>
+				<p class="card-text">Date of Birth: @Model.DateOfBirth</p>
+				<p class="card-text">Resume: <a href="Resume/@Model.Email/@Model.ResumeFile">@Model.ResumeFile</a></p>
+				<p class="card-text">Who Am I?: @Model.About</p>
+				<a href="ChangePassword" class="btn btn-primary">Change Password</a>
+			</div>
+		</div>
+	</div>
+
+} else {
+	<div class="text-center">
+		<h1 class="display-4">Welcome</h1>
+		<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+	</div>
+}
