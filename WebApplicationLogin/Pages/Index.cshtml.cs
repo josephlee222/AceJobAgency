@@ -68,7 +68,7 @@ namespace AceJobAgency.Pages
 				var lastPasswordChange = user.LastPasswordChange;
 				var minutesSinceLastPasswordChange = (DateTime.Now - lastPasswordChange).TotalMinutes;
 
-				if (minutesSinceLastPasswordChange > 1)
+				if (minutesSinceLastPasswordChange > 60)
 				{
 					return RedirectToPage("/ChangePassword");
 				}

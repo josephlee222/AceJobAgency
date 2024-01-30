@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using AceJobAgency.ViewModels;
+using System.Text.Encodings.Web;
 
 namespace AceJobAgency.Pages
 {
@@ -69,6 +70,7 @@ namespace AceJobAgency.Pages
 				// Create data protection provider
 				var p = DataProtectionProvider.Create("EncryptData");
 				var dataProtect = p.CreateProtector("MySecretKey");
+				var encoder = UrlEncoder.Create();
 
 				//Create identity user
 				var user = new MemberIdentity
@@ -81,7 +83,7 @@ namespace AceJobAgency.Pages
 					Nric = dataProtect.Protect(RModel.Nric),
 					DateOfBirth = RModel.DateOfBirth,
 					Resume = RModel.Resume.FileName,
-					About = RModel.About
+					About = HtmlEncoder.Default.Encode(RModel.About),
 				};
 				var result = await userManager.CreateAsync(user, RModel.Password);
 				if (result.Succeeded)

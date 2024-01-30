@@ -25,7 +25,7 @@ builder.Services.AddIdentity<MemberIdentity, IdentityRole>(options =>
 
 builder.Services.AddSession(options =>
 {
-	options.IdleTimeout = TimeSpan.FromMinutes(5);
+	options.IdleTimeout = TimeSpan.FromMinutes(1);
 	options.Cookie.HttpOnly = true;
 	options.Cookie.IsEssential = true;
 	options.Cookie.SameSite = SameSiteMode.Strict;
@@ -33,7 +33,7 @@ builder.Services.AddSession(options =>
 
 builder.Services.ConfigureApplicationCookie(Config =>
 {
-	Config.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+	Config.ExpireTimeSpan = TimeSpan.FromMinutes(1);
 	Config.LoginPath = "/Login";
 	Config.Cookie.HttpOnly = true;
 	Config.SlidingExpiration = true;

@@ -85,9 +85,9 @@ namespace AceJobAgency.Pages
 				// Check whether a password change happened in the last 24 hours
 				var lastChange = user.LastPasswordChange;
 				var timeSpan = DateTime.Now - lastChange;
-				if (timeSpan.TotalHours < 1)
+				if (timeSpan.TotalMinutes < 30)
 				{
-					ModelState.AddModelError("", "You can only change your password once every hour");
+					ModelState.AddModelError("", "You can only change your password once every 30 minutes");
 					return Page();
 				}
 				

@@ -22,7 +22,7 @@
 				<p class="card-text">NRIC: @Model.Nric</p>
 				<p class="card-text">Date of Birth: @Model.DateOfBirth</p>
 				<p class="card-text">Resume: <a href="Resume/@Model.Email/@Model.ResumeFile">@Model.ResumeFile</a></p>
-				<p class="card-text">Who Am I?: @Model.About</p>
+				<p class="card-text">Who Am I?: @Html.Raw(Model.About)</p>
 				<a href="ChangePassword" class="btn btn-primary">Change Password</a>
 				<a href="Enable2FA" class="btn btn-primary">Enable 2FA</a>
 			</div>
