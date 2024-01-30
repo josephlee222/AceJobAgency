@@ -83,15 +83,14 @@ namespace AceJobAgency.Pages
 				}
 
 				// Check whether a password change happened in the last 24 hours
-				var lastChange = passwordHistory.OrderByDescending(x => x.DateChanged).FirstOrDefault();
-				if (lastChange != null)
+				var lastChange = user.LastPasswordChange;
+				var timeSpan = DateTime.Now - lastChange;
+				if (timeSpan.TotalHours < 1)
 				{
-					if (lastChange.DateChanged.AddHours(24) > DateTime.Now)
-					{
-						ModelState.AddModelError("", "You cannot change your password more than once in 24 hours");
-						return Page();
-					}
+					ModelState.AddModelError("", "You can only change your password once every hour");
+					return Page();
 				}
+				
 
 				// Change the password
 				await signInManager.UserManager.ChangePasswordAsync(user, CPModel.CurrentPassword, CPModel.Password);
@@ -103,6 +102,7 @@ namespace AceJobAgency.Pages
 					Password = signInManager.UserManager.PasswordHasher.HashPassword(user, CPModel.Password),
 					DateChanged = DateTime.Now
 				});
+				user.LastPasswordChange = DateTime.Now;
 
 				// Add audit record
 				_context.AuditLogs.Add(new AuditLog

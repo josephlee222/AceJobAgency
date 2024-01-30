@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Identity.Client;
 using AceJobAgency.ViewModels;
+using WebApp_Core_Identity.Model;
 
 namespace AceJobAgency.Pages
 {
@@ -14,10 +15,17 @@ namespace AceJobAgency.Pages
 		private readonly ILogger<IndexModel> _logger;
 		private SignInManager<MemberIdentity> signInManager { get; }
 		private UserManager<MemberIdentity> userManager { get; }
-		public IndexModel(UserManager<MemberIdentity> userManager, SignInManager<MemberIdentity> signInManager, ILogger<IndexModel> logger)
+		private AuthDbContext _context { get; }
+		public IndexModel(
+			UserManager<MemberIdentity> userManager, 
+			SignInManager<MemberIdentity> signInManager, 
+			ILogger<IndexModel> logger,
+			AuthDbContext context
+		)
 		{
 			this.userManager = userManager;
 			this.signInManager = signInManager;
+			_context = context;
 			_logger = logger;
 		}
 
@@ -42,10 +50,29 @@ namespace AceJobAgency.Pages
 				// Check GUID
 				if (user.GUID != GUID)
 				{
-					// GUID is not the same, logout
+					// GUID is not the same, audit and logout
+					var audit = new AuditLog
+					{
+						CreatedDate = DateTime.Now,
+						UserId = user.Id,
+						Activity = "Logged out due to GUID mismatch"
+					};
+
+					_context.AuditLogs.Add(audit);
+					await _context.SaveChangesAsync();
 					await signInManager.SignOutAsync();
 					return RedirectToPage("/Index");
 				}
+
+				// Check last password change
+				var lastPasswordChange = user.LastPasswordChange;
+				var minutesSinceLastPasswordChange = (DateTime.Now - lastPasswordChange).TotalMinutes;
+
+				if (minutesSinceLastPasswordChange > 1)
+				{
+					return RedirectToPage("/ChangePassword");
+				}
+
 
 				Email = user.Email;
                 FirstName = user.FirstName;

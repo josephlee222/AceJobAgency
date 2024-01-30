@@ -96,9 +96,11 @@ namespace AceJobAgency.Pages
 						Activity = "Password reset"
 					};
 
+					user.LastPasswordChange = DateTime.Now;
 					_context.PasswordHistories.Add(newHistory);
 					_context.AuditLogs.Add(auditLog);
 					await _context.SaveChangesAsync();
+					await signInManager.UserManager.UpdateAsync(user);
 
 					// Sign the user out
 					await signInManager.SignOutAsync();
