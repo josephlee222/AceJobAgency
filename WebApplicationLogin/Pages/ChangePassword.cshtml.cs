@@ -82,7 +82,7 @@ namespace AceJobAgency.Pages
 					}
 				}
 
-				// Check whether a password change happened in the last 24 hours
+				// Check whether a password change happened in the last 30 minutes
 				var lastChange = user.LastPasswordChange;
 				var timeSpan = DateTime.Now - lastChange;
 				if (timeSpan.TotalMinutes < 30)

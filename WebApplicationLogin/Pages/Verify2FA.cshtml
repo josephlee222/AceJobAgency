@@ -22,7 +22,7 @@
 				<div asp-validation-summary="All" class="text-danger"></div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="VModel.Code">Verification Code</label>
-					<input type="number" asp-for="VModel.Code" class="form-control" />
+					<input required type="number" asp-for="VModel.Code" class="form-control" />
 					<span asp-validaton-for="VModel.Code" class="text-danger"></span>
 				</div>
 

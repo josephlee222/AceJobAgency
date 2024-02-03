@@ -18,35 +18,35 @@
 				<div asp-validation-summary="All" class="text-danger"></div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="RModel.Email">Email Address</label>
-					<input type="Text" asp-for="RModel.Email" class="form-control" />
+					<input required type="email" asp-for="RModel.Email" class="form-control" />
 					<span asp-validaton-for="RModel.Email" class="text-danger"></span>
 				</div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="RModel.Password">Password</label>
-					<input id="password" type="password" asp-for="RModel.Password" class="form-control" />
+					<input required id="password" type="password" asp-for="RModel.Password" class="form-control" />
 					<div class="progress mt-1">
 						<div id="strength" class="progress-bar bg-danger progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
 					</div>
-					<span asp-validaton-for="RModel.Password" class="text-danger"></span>
+					<span asp-validaton-for="RModel.Password" class="text-danger" id="password-error"></span>
 				</div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="RModel.ConfirmPassword">Confirm Password</label>
-					<input type="password" asp-for="RModel.ConfirmPassword" class="form-control" />
+					<input required type="password" asp-for="RModel.ConfirmPassword" class="form-control" />
 					<span asp-validaton-for="RModel.ConfirmPassword" class="text-danger"></span>
 				</div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="RModel.FirstName">First Name</label>
-					<input type="Text" asp-for="RModel.FirstName" class="form-control" />
+					<input required type="Text" asp-for="RModel.FirstName" class="form-control" />
 					<span asp-validaton-for="RModel.FirstName" class="text-danger"></span>
 				</div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="RModel.LastName">Last Name</label>
-					<input type="Text" asp-for="RModel.LastName" class="form-control" />
+					<input required type="Text" asp-for="RModel.LastName" class="form-control" />
 					<span asp-validaton-for="RModel.LastName" class="text-danger"></span>
 				</div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="RModel.Nric">NRIC</label>
-					<input type="Text" asp-for="RModel.Nric" class="form-control" />
+					<input required type="Text" asp-for="RModel.Nric" class="form-control" />
 					<span asp-validaton-for="RModel.Nric" class="text-danger"></span>
 				</div>
 				<div class="mb-3">
@@ -58,17 +58,17 @@
 				</div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="RModel.DateOfBirth">Date-of-Birth</label>
-					<input type="date" asp-for="RModel.DateOfBirth" class="form-control" />
+					<input required type="date" asp-for="RModel.DateOfBirth" class="form-control" />
 					<span asp-validaton-for="RModel.DateOfBirth" class="text-danger"></span>
 				</div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="RModel.Resume">Resume Upload (Only PDF or DOCX files)</label>
-					<input type="file" asp-for="RModel.Resume" class="form-control" accept=".pdf, .docx, .doc" />
+					<input required type="file" asp-for="RModel.Resume" class="form-control" accept=".pdf, .docx, .doc" />
 					<span asp-validaton-for="RModel.Resume" class="text-danger"></span>
 				</div>
 				<div class="mb-3">
 					<label class="form-label" asp-for="RModel.About">Who Am I?</label>
-					<textarea type="text" asp-for="RModel.About" class="form-control"></textarea>
+					<textarea required type="text" asp-for="RModel.About" class="form-control"></textarea>
 					<span asp-validaton-for="RModel.About" class="text-danger"></span>
 				</div>
 				<div class="mb-3">
@@ -83,7 +83,11 @@
 
 <script>
 	function onSubmit(token) {
-		document.getElementById("registerForm").submit();
+		if (checkPassword(document.getElementById("password").value)) {
+			document.getElementById("registerForm").submit();
+		} else {
+			document.getElementById("password-error").innerText = "Password is too weak"
+		}
 	}
 
 	var password = document.getElementById("password")
@@ -147,5 +151,11 @@
 				strengthBar.innerHTML = "Strong!";
 				break
 		}
+
+		if (strength < 5) {
+			return false;
+		}
+
+		return true;
 	}
 </script>
